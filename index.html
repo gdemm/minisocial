@@ -96,7 +96,7 @@
   @media(min-width:640px){.modal{padding-top:5vh}.sheet{min-height:auto;border-radius:16px}}
   .sheet .bar{position:sticky;top:0;background:var(--bg);z-index:2;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .sheet .x{background:none;border:0;font-size:22px;padding:4px 8px}
-  .sheet textarea{width:100%;border:0;outline:none;font-size:18px;min-height:140px;resize:none;font-family:inherit}
+  .sheet textarea{width:100%;border:0;outline:none;font-size:18px;min-height:120px;resize:none;font-family:inherit}
   .preview img,.preview video{max-width:100%;max-height:300px;border-radius:16px;display:block}
   .tools{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-top:10px;color:var(--accent)}
   .tools label{cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px}
@@ -174,7 +174,7 @@
 </div>
 
 <!-- 发帖弹层 -->
-<div id="composer" class="modal hide">
+<div id="composer" class="modal pop hide">
   <div class="sheet">
     <div class="bar">
       <button class="x" id="closeCompose">✕</button>
@@ -191,7 +191,7 @@
 </div>
 
 <!-- 设置（点头像打开） -->
-<div id="settings" class="modal hide">
+<div id="settings" class="modal pop hide">
   <div class="sheet">
     <div class="bar">
       <button class="x" id="closeSet">✕</button>
@@ -204,6 +204,8 @@
       <button class="x" id="avReset" style="font-size:13px;color:var(--mut)">恢复默认头像</button>
     </div>
     <div class="set-row"><span>用户名</span><span class="mut" id="setName"></span></div>
+    <div class="set-label">昵称</div>
+    <input id="setNick" class="set-bio" style="min-height:0" maxlength="20" placeholder="不填就显示用户名">
     <div class="set-label">个人简介</div>
     <textarea id="setBio" class="set-bio" maxlength="160" placeholder="介绍一下自己"></textarea>
     <div class="set-label">主题</div>
@@ -247,8 +249,8 @@ const ICON = {
 function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function color(name){ let h=0; for(const c of name||'?') h=(h*31+c.charCodeAt(0))%360; return `hsl(${h},55%,52%)`; }
 // 头像地址和简介一起存在 bio 字段里（JSON），不用改表结构
-function unpack(bio){ if(bio && bio.startsWith('{"')){ try{ const o=JSON.parse(bio); return { b:o.b||'', a:o.a||null }; }catch(_){} } return { b:bio||'', a:null }; }
-function pack(b,a){ return a ? JSON.stringify({ b, a }) : b; }
+function unpack(bio){ if(bio && bio.startsWith('{"')){ try{ const o=JSON.parse(bio); return { b:o.b||'', a:o.a||null, n:o.n||'' }; }catch(_){} } return { b:bio||'', a:null, n:'' }; }
+function pack(b,a,n){ return (a||n) ? JSON.stringify({ b, a:a||undefined, n:n||undefined }) : b; }
 function avInner(name,url){ return url ? `<img src="${esc(url)}" alt="">` : esc((name||'?')[0].toUpperCase()); }
 function avatar(name, url, cls=''){ return `<div class="av ${cls}" style="background:${color(name)}">${avInner(name,url)}</div>`; }
 function paintMyAv(){ ['#topAv','#quickAv'].forEach(id=>{ const el=$(id); el.style.background=color(me.username); el.innerHTML=avInner(me.username, me.avatar_url); }); }
@@ -306,7 +308,7 @@ async function boot(session){
       ({ data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
     }
     me = prof || { id:session.user.id, username:session.user.email.split('@')[0] };
-    { const u=unpack(me.bio); me.bio=u.b; me.avatar_url=u.a; }
+    { const u=unpack(me.bio); me.bio=u.b; me.avatar_url=u.a; me.nick=u.n; }
     $('#auth').classList.add('hide'); $('#main').classList.remove('hide');
     paintMyAv();
     await loadFeed();
@@ -332,6 +334,7 @@ $('#q').oninput = () => { clearTimeout(searchTimer); searchTimer = setTimeout(lo
 
 // ---------- 发帖 ----------
 $('#quick').onclick = () => $('#fab').click();
+$('#composer').onclick = e => { if(e.target.id==='composer') closeCompose(); };
 $('#fab').onclick = () => { $('#composer').classList.remove('hide'); setTimeout(()=>$('#newContent').focus(),50); };
 $('#closeCompose').onclick = closeCompose;
 function closeCompose(){ $('#composer').classList.add('hide'); $('#newContent').value=''; $('#newMedia').value=''; $('#preview').innerHTML=''; $('#postErr').textContent=''; $('#count').textContent='0/500'; }
@@ -373,6 +376,7 @@ function openSettings(){
   avBlob=null; avCleared=false; $('#setErr').textContent='';
   $('#setName').textContent='@'+me.username;
   $('#setBio').value = me.bio||'';
+  $('#setNick').value = me.nick||'';
   $('#setAv').style.background=color(me.username); $('#setAv').innerHTML=avInner(me.username, me.avatar_url);
   $('#settings').classList.remove('hide');
 }
@@ -408,14 +412,14 @@ $('#avFile').onchange = async () => {
 $('#saveSet').onclick = async () => {
   $('#setErr').textContent=''; $('#saveSet').disabled=true; $('#saveSet').textContent='保存中…';
   try{
-    const upd = { bio: $('#setBio').value.trim(), avatar_url: me.avatar_url };
+    const upd = { bio: $('#setBio').value.trim(), avatar_url: me.avatar_url, nick: $('#setNick').value.trim() };
     if(avBlob){
       const path = `${me.id}/avatar_${Date.now()}.jpg`;
       const { error } = await sb.storage.from('media').upload(path, avBlob, { contentType:'image/jpeg' });
       if(error) throw error;
       upd.avatar_url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
     } else if(avCleared) upd.avatar_url = null;
-    const { error } = await sb.from('profiles').update({ bio: pack(upd.bio, upd.avatar_url) }).eq('id', me.id);
+    const { error } = await sb.from('profiles').update({ bio: pack(upd.bio, upd.avatar_url, upd.nick) }).eq('id', me.id);
     if(error) throw error;
     Object.assign(me, upd); paintMyAv();
     $('#settings').classList.add('hide'); toast('已保存'); loadFeed();
@@ -471,7 +475,7 @@ async function renderMe(postCount){
       ${avatar(me.username, me.avatar_url)}
       <button class="outline" id="editBtn">编辑资料</button>
     </div>
-    <h2>${esc(me.username)}</h2>
+    <h2>${esc(me.nick || me.username)}</h2>
     <div class="mut">@${esc(me.username.toLowerCase())}</div>
     ${me.bio ? `<div style="margin-top:8px;font-size:15px;white-space:pre-wrap">${esc(me.bio)}</div>` : ''}
     <div class="stats"><span><b>${following||0}</b> 正在关注</span><span><b>${followers||0}</b> 关注者</span><span><b>${postCount}</b> 帖子</span></div>`;
@@ -480,14 +484,15 @@ async function renderMe(postCount){
 
 function render(p, likeCount, liked, cmtCount){
   const name = p.profiles?.username || '匿名';
+  const pu = unpack(p.profiles?.bio), shown = pu.n || name;
   let media = '';
   if(p.media_url && p.media_type==='image') media = `<div class="pmedia"><img src="${esc(p.media_url)}" loading="lazy"></div>`;
   if(p.media_url && p.media_type==='video') media = `<div class="pmedia"><video src="${esc(p.media_url)}" controls playsinline preload="metadata"></video></div>`;
   const followBtn = p.user_id!==me.id ? `<button class="fol ${myFollows.has(p.user_id)?'on':''}">${myFollows.has(p.user_id)?'已关注':'关注'}</button>` : '';
   return `<article class="post" data-id="${p.id}">
-    ${avatar(name, unpack(p.profiles?.bio).a)}
+    ${avatar(name, pu.a)}
     <div class="pbody">
-      <div class="phead"><span class="nm">${esc(name)}</span><span class="hd">@${esc(name.toLowerCase())} · ${ago(p.created_at)}</span><span class="sp"></span>${followBtn}</div>
+      <div class="phead"><span class="nm">${esc(shown)}</span><span class="hd">@${esc(name.toLowerCase())} · ${ago(p.created_at)}</span><span class="sp"></span>${followBtn}</div>
       ${p.content ? `<div class="ptext">${esc(p.content)}</div>` : ''}
       ${media}
       <div class="acts">
@@ -528,7 +533,7 @@ async function toggleComments(postId, el){
   if(!box.classList.contains('hide')){ box.classList.add('hide'); return; }
   box.classList.remove('hide');
   const { data } = await sb.from('comments').select('id,content,created_at,profiles(username,bio)').eq('post_id',postId).order('created_at',{ascending:true});
-  box.innerHTML = (data||[]).map(c => `<div class="cmt"><div style="display:flex;align-items:center;gap:8px">${avatar(c.profiles?.username||'?', unpack(c.profiles?.bio).a, 'sm')}<b>${esc(c.profiles?.username||'匿名')}</b><span class="t">${ago(c.created_at)}</span></div><div style="margin-left:32px">${esc(c.content)}</div></div>`).join('')
+  box.innerHTML = (data||[]).map(c => `<div class="cmt"><div style="display:flex;align-items:center;gap:8px">${avatar(c.profiles?.username||'?', unpack(c.profiles?.bio).a, 'sm')}<b>${esc(unpack(c.profiles?.bio).n || c.profiles?.username||'匿名')}</b><span class="t">${ago(c.created_at)}</span></div><div style="margin-left:32px">${esc(c.content)}</div></div>`).join('')
     + `<div class="crow"><input class="ci" placeholder="发布你的回复" maxlength="300"><button class="pill cb">回复</button></div>`;
   const send = async () => {
     const v = box.querySelector('.ci').value.trim(); if(!v) return;
