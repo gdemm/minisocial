@@ -51,6 +51,9 @@
   .crow input{flex:1;border:1px solid #cfd9de;border-radius:999px;padding:8px 14px;font-size:14px;outline:none}
   .pill{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700;white-space:nowrap}
   .pill:disabled{opacity:.5}
+  .quick{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+  .quick .av{width:40px;height:40px;font-size:16px}
+  .quick .qph{flex:1;color:var(--mut);font-size:17px}
   .empty{text-align:center;color:var(--mut);padding:40px 20px}
 
   /* 发帖按钮 */
@@ -79,7 +82,7 @@
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-start;justify-content:center}
   .sheet{background:#fff;width:100%;max-width:600px;min-height:100%;padding:12px 16px}
   @media(min-width:640px){.modal{padding-top:5vh}.sheet{min-height:auto;border-radius:16px}}
-  .sheet .bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sheet .bar{position:sticky;top:0;background:#fff;z-index:2;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .sheet .x{background:none;border:0;font-size:22px;padding:4px 8px}
   .sheet textarea{width:100%;border:0;outline:none;font-size:18px;min-height:140px;resize:none;font-family:inherit}
   .preview img,.preview video{max-width:100%;max-height:300px;border-radius:16px;display:block}
@@ -133,6 +136,7 @@
     <div id="searchBar" class="search hide"><input id="q" placeholder="搜索帖子" /></div>
   </div>
 
+  <div id="quick" class="quick"><div id="quickAv" class="av"></div><div class="qph">有什么新鲜事？</div><button class="pill" id="quickBtn">发帖</button></div>
   <div id="meCard" class="me-card hide"></div>
   <section id="feed"></section>
 
@@ -240,6 +244,7 @@ async function boot(session){
     $('#auth').classList.add('hide'); $('#main').classList.remove('hide');
     $('#topAv').outerHTML = `<div id="topAv" class="av" style="background:${color(me.username)}">${esc(me.username[0].toUpperCase())}</div>`;
     $('#topAv').onclick = () => go('me');
+    $('#quickAv').style.background = color(me.username); $('#quickAv').textContent = me.username[0].toUpperCase();
     await loadFeed();
   } finally { booting = false; }
 }
@@ -252,6 +257,7 @@ function go(v){
   $('#feedTabs').classList.toggle('hide', v!=='home');
   $('#searchBar').classList.toggle('hide', v!=='search');
   $('#meCard').classList.toggle('hide', v!=='me');
+  $('#quick').classList.toggle('hide', v!=='home');
   window.scrollTo(0,0);
   if(v==='search') setTimeout(()=>$('#q').focus(),50);
   loadFeed();
@@ -261,6 +267,7 @@ $('#tabFollow').onclick = () => { feedMode='follow'; $('#tabFollow').classList.a
 $('#q').oninput = () => { clearTimeout(searchTimer); searchTimer = setTimeout(loadFeed, 350); };
 
 // ---------- 发帖 ----------
+$('#quick').onclick = () => $('#fab').click();
 $('#fab').onclick = () => { $('#composer').classList.remove('hide'); setTimeout(()=>$('#newContent').focus(),50); };
 $('#closeCompose').onclick = closeCompose;
 function closeCompose(){ $('#composer').classList.add('hide'); $('#newContent').value=''; $('#newMedia').value=''; $('#preview').innerHTML=''; $('#postErr').textContent=''; $('#count').textContent='0/500'; }
