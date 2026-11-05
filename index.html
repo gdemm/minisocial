@@ -12,7 +12,7 @@
   header h1{font-size:18px;margin:0}
   #me{font-size:13px;color:var(--mut)}
   .wrap{max-width:600px;margin:0 auto;padding:0 12px}
-  button{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer}
+  button{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;white-space:nowrap}
   button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
   button:disabled{opacity:.5;cursor:default}
   input,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;font-size:14px;margin:6px 0}
@@ -26,9 +26,14 @@
   .time{color:var(--mut);font-size:12px;margin-left:6px}
   .mut{color:var(--mut);font-size:13px}
   .comment{border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-size:14px}
-  .hide{display:none}
-  .tabbar{display:flex;gap:8px;margin:12px 0}
-  .tabbar button{flex:0}
+  .hide{display:none !important}
+  .tabbar{display:flex;margin:12px 0;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .tabbar button{flex:1;border-radius:0;border:0;padding:10px 0;white-space:nowrap}
+  .tabbar button.ghost{background:transparent;color:var(--mut)}
+  #authBtn{width:100%;margin-top:6px}
+  .fol{white-space:nowrap;flex-shrink:0}
+  .head{display:flex;align-items:center;gap:6px}
+  .head .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   a{color:var(--accent)}
   .err{color:#f4576b;font-size:13px}
 </style>
@@ -215,7 +220,7 @@ function render(p, likeCount, liked){
   if(p.media_url && p.media_type==='image') media=`<div class="post-media"><img src="${p.media_url}" loading="lazy"></div>`;
   if(p.media_url && p.media_type==='video') media=`<div class="post-media"><video src="${p.media_url}" controls></video></div>`;
   return `<div class="card" data-id="${p.id}">
-    <div><span class="name">@${esc(p.profiles?.username||'匿名')}</span><span class="time">${when(p.created_at)}</span>${p.user_id!==me.id?`<button class="ghost fol" style="float:right;padding:4px 12px;font-size:12px">${myFollows.has(p.user_id)?'已关注':'+ 关注'}</button>`:''}</div>
+    <div class="head"><span class="who"><span class="name">@${esc(p.profiles?.username||'匿名')}</span><span class="time">${when(p.created_at)}</span></span>${p.user_id!==me.id?`<button class="ghost fol" style="padding:4px 12px;font-size:12px">${myFollows.has(p.user_id)?'已关注':'+ 关注'}</button>`:''}</div>
     <div>${esc(p.content)}</div>
     ${media}
     <div class="row">
