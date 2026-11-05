@@ -242,6 +242,9 @@ const ICON = {
 // ---------- 工具 ----------
 function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function color(name){ let h=0; for(const c of name||'?') h=(h*31+c.charCodeAt(0))%360; return `hsl(${h},55%,52%)`; }
+// 头像地址和简介一起存在 bio 字段里（JSON），不用改表结构
+function unpack(bio){ if(bio && bio.startsWith('{"')){ try{ const o=JSON.parse(bio); return { b:o.b||'', a:o.a||null }; }catch(_){} } return { b:bio||'', a:null }; }
+function pack(b,a){ return a ? JSON.stringify({ b, a }) : b; }
 function avInner(name,url){ return url ? `<img src="${esc(url)}" alt="">` : esc((name||'?')[0].toUpperCase()); }
 function avatar(name, url, cls=''){ return `<div class="av ${cls}" style="background:${color(name)}">${avInner(name,url)}</div>`; }
 function paintMyAv(){ ['#topAv','#quickAv'].forEach(id=>{ const el=$(id); el.style.background=color(me.username); el.innerHTML=avInner(me.username, me.avatar_url); }); }
@@ -299,6 +302,7 @@ async function boot(session){
       ({ data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
     }
     me = prof || { id:session.user.id, username:session.user.email.split('@')[0] };
+    { const u=unpack(me.bio); me.bio=u.b; me.avatar_url=u.a; }
     $('#auth').classList.add('hide'); $('#main').classList.remove('hide');
     paintMyAv();
     await loadFeed();
@@ -399,14 +403,14 @@ $('#avFile').onchange = async () => {
 $('#saveSet').onclick = async () => {
   $('#setErr').textContent=''; $('#saveSet').disabled=true; $('#saveSet').textContent='保存中…';
   try{
-    const upd = { bio: $('#setBio').value.trim() };
+    const upd = { bio: $('#setBio').value.trim(), avatar_url: me.avatar_url };
     if(avBlob){
       const path = `${me.id}/avatar_${Date.now()}.jpg`;
       const { error } = await sb.storage.from('media').upload(path, avBlob, { contentType:'image/jpeg' });
       if(error) throw error;
       upd.avatar_url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
     } else if(avCleared) upd.avatar_url = null;
-    const { error } = await sb.from('profiles').update(upd).eq('id', me.id);
+    const { error } = await sb.from('profiles').update({ bio: pack(upd.bio, upd.avatar_url) }).eq('id', me.id);
     if(error) throw error;
     Object.assign(me, upd); paintMyAv();
     $('#settings').classList.add('hide'); toast('已保存'); loadFeed();
@@ -420,7 +424,7 @@ async function loadFeed(){
   myFollows = new Set((f||[]).map(x=>x.following_id));
 
   let q = sb.from('posts')
-    .select('id,content,media_url,media_type,created_at,user_id,profiles!posts_user_id_fkey(username,avatar_url)')
+    .select('id,content,media_url,media_type,created_at,user_id,profiles!posts_user_id_fkey(username,bio)')
     .order('created_at',{ascending:false}).limit(50);
   if(view==='home' && feedMode==='follow') q = q.in('user_id', [...myFollows, me.id]);
   if(view==='me') q = q.eq('user_id', me.id);
@@ -476,7 +480,7 @@ function render(p, likeCount, liked, cmtCount){
   if(p.media_url && p.media_type==='video') media = `<div class="pmedia"><video src="${esc(p.media_url)}" controls playsinline preload="metadata"></video></div>`;
   const followBtn = p.user_id!==me.id ? `<button class="fol ${myFollows.has(p.user_id)?'on':''}">${myFollows.has(p.user_id)?'已关注':'关注'}</button>` : '';
   return `<article class="post" data-id="${p.id}">
-    ${avatar(name, p.profiles?.avatar_url)}
+    ${avatar(name, unpack(p.profiles?.bio).a)}
     <div class="pbody">
       <div class="phead"><span class="nm">${esc(name)}</span><span class="hd">@${esc(name.toLowerCase())} · ${ago(p.created_at)}</span><span class="sp"></span>${followBtn}</div>
       ${p.content ? `<div class="ptext">${esc(p.content)}</div>` : ''}
@@ -518,8 +522,8 @@ async function toggleComments(postId, el){
   const box = el.querySelector('.cbox');
   if(!box.classList.contains('hide')){ box.classList.add('hide'); return; }
   box.classList.remove('hide');
-  const { data } = await sb.from('comments').select('id,content,created_at,profiles(username,avatar_url)').eq('post_id',postId).order('created_at',{ascending:true});
-  box.innerHTML = (data||[]).map(c => `<div class="cmt"><div style="display:flex;align-items:center;gap:8px">${avatar(c.profiles?.username||'?', c.profiles?.avatar_url, 'sm')}<b>${esc(c.profiles?.username||'匿名')}</b><span class="t">${ago(c.created_at)}</span></div><div style="margin-left:32px">${esc(c.content)}</div></div>`).join('')
+  const { data } = await sb.from('comments').select('id,content,created_at,profiles(username,bio)').eq('post_id',postId).order('created_at',{ascending:true});
+  box.innerHTML = (data||[]).map(c => `<div class="cmt"><div style="display:flex;align-items:center;gap:8px">${avatar(c.profiles?.username||'?', unpack(c.profiles?.bio).a, 'sm')}<b>${esc(c.profiles?.username||'匿名')}</b><span class="t">${ago(c.created_at)}</span></div><div style="margin-left:32px">${esc(c.content)}</div></div>`).join('')
     + `<div class="crow"><input class="ci" placeholder="发布你的回复" maxlength="300"><button class="pill cb">回复</button></div>`;
   const send = async () => {
     const v = box.querySelector('.ci').value.trim(); if(!v) return;
