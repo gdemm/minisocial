@@ -2,106 +2,205 @@
 <html lang="zh">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>微圈 · MiniSocial</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>微圈</title>
 <style>
-  :root{--bg:#15202b;--card:#1e2b38;--line:#2f3f4e;--txt:#e7ecef;--mut:#8aa0b2;--accent:#1d9bf0;}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt)}
-  header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;z-index:5}
-  header h1{font-size:18px;margin:0}
-  #me{font-size:13px;color:var(--mut)}
-  .wrap{max-width:600px;margin:0 auto;padding:0 12px}
-  button{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;white-space:nowrap}
-  button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
-  button:disabled{opacity:.5;cursor:default}
-  input,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;font-size:14px;margin:6px 0}
-  textarea{resize:vertical;min-height:60px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
-  .post-media img,.post-media video{max-width:100%;border-radius:10px;margin-top:8px;display:block}
-  .row{display:flex;gap:16px;align-items:center;color:var(--mut);font-size:13px;margin-top:10px}
-  .row span{cursor:pointer;user-select:none}
-  .row span.on{color:var(--accent)}
-  .name{font-weight:600}
-  .time{color:var(--mut);font-size:12px;margin-left:6px}
-  .mut{color:var(--mut);font-size:13px}
-  .comment{border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-size:14px}
+  :root{--bg:#fff;--txt:#0f1419;--mut:#536471;--line:#eff3f4;--accent:#1d9bf0;--like:#f91880;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif}
   .hide{display:none !important}
-  .tabbar{display:flex;margin:12px 0;border:1px solid var(--line);border-radius:999px;overflow:hidden}
-  .tabbar button{flex:1;border-radius:0;border:0;padding:10px 0;white-space:nowrap}
-  .tabbar button.ghost{background:transparent;color:var(--mut)}
-  #authBtn{width:100%;margin-top:6px}
-  .fol{white-space:nowrap;flex-shrink:0}
-  .head{display:flex;align-items:center;gap:6px}
-  .head .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  a{color:var(--accent)}
-  .err{color:#f4576b;font-size:13px}
+  .app{max-width:600px;margin:0 auto;min-height:100vh;border-left:1px solid var(--line);border-right:1px solid var(--line);padding-bottom:70px}
+  button{font-family:inherit;cursor:pointer}
+  svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+  /* 顶栏 */
+  .top{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .topbar{display:flex;align-items:center;justify-content:center;height:54px;position:relative}
+  .topbar .av{position:absolute;left:16px;width:34px;height:34px;font-size:15px}
+  .logo{font-size:22px;font-weight:800;letter-spacing:1px}
+  .tabs{display:flex}
+  .tabs button{flex:1;background:none;border:0;height:50px;font-size:16px;color:var(--mut);font-weight:500;position:relative}
+  .tabs button.on{color:var(--txt);font-weight:700}
+  .tabs button.on::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:56px;height:4px;border-radius:2px;background:var(--accent)}
+
+  /* 头像 */
+  .av{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;user-select:none}
+
+  /* 帖子 */
+  .post{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .post .av{width:42px;height:42px;font-size:17px}
+  .pbody{flex:1;min-width:0}
+  .phead{display:flex;align-items:center;gap:4px;font-size:15px;white-space:nowrap}
+  .phead .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;max-width:40%}
+  .phead .hd{color:var(--mut);overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .phead .sp{flex:1}
+  .fol{border:1px solid #cfd9de;background:#fff;color:var(--txt);border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+  .fol.on{background:var(--txt);color:#fff;border-color:var(--txt)}
+  .ptext{font-size:15px;line-height:1.5;margin-top:2px;white-space:pre-wrap;word-break:break-word}
+  .pmedia{margin-top:10px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .pmedia img,.pmedia video{display:block;width:100%;max-height:520px;object-fit:cover;background:#000}
+  .acts{display:flex;justify-content:space-between;margin-top:10px;max-width:420px;color:var(--mut);font-size:13px}
+  .acts span{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .acts .like.on{color:var(--like)}
+  .acts .like.on svg{fill:var(--like);stroke:var(--like)}
+  .cbox{margin-top:8px}
+  .cmt{padding:8px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.45}
+  .cmt b{font-weight:700}
+  .cmt .t{color:var(--mut);font-size:12px;margin-left:6px}
+  .crow{display:flex;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
+  .crow input{flex:1;border:1px solid #cfd9de;border-radius:999px;padding:8px 14px;font-size:14px;outline:none}
+  .pill{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+  .pill:disabled{opacity:.5}
+  .empty{text-align:center;color:var(--mut);padding:40px 20px}
+
+  /* 发帖按钮 */
+  .fab{position:fixed;right:max(20px,calc(50% - 280px));bottom:84px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:0;box-shadow:0 4px 14px rgba(29,155,240,.45);display:flex;align-items:center;justify-content:center;z-index:20}
+  .fab svg{width:26px;height:26px}
+
+  /* 底部导航 */
+  .nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+  .nav .in{max-width:600px;margin:0 auto;display:flex}
+  .nav button{flex:1;height:56px;background:none;border:0;color:var(--txt);display:flex;align-items:center;justify-content:center}
+  .nav button svg{width:27px;height:27px}
+  .nav button.on svg{stroke-width:2.6}
+
+  /* 搜索 / 我的 */
+  .search{padding:10px 16px;border-bottom:1px solid var(--line)}
+  .search input{width:100%;background:#eff3f4;border:0;border-radius:999px;padding:11px 16px;font-size:15px;outline:none}
+  .me-card{padding:20px 16px;border-bottom:1px solid var(--line)}
+  .me-card .av{width:68px;height:68px;font-size:28px}
+  .me-card h2{margin:10px 0 0;font-size:20px}
+  .me-card .mut{color:var(--mut);font-size:14px;margin-top:2px}
+  .me-card .stats{display:flex;gap:16px;margin-top:10px;font-size:14px;color:var(--mut)}
+  .me-card .stats b{color:var(--txt)}
+  .outline{background:#fff;border:1px solid #cfd9de;color:var(--txt);border-radius:999px;padding:7px 16px;font-weight:700;font-size:14px}
+
+  /* 发帖弹层 */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-start;justify-content:center}
+  .sheet{background:#fff;width:100%;max-width:600px;min-height:100%;padding:12px 16px}
+  @media(min-width:640px){.modal{padding-top:5vh}.sheet{min-height:auto;border-radius:16px}}
+  .sheet .bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sheet .x{background:none;border:0;font-size:22px;padding:4px 8px}
+  .sheet textarea{width:100%;border:0;outline:none;font-size:18px;min-height:140px;resize:none;font-family:inherit}
+  .preview img,.preview video{max-width:100%;max-height:300px;border-radius:16px;display:block}
+  .tools{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-top:10px;color:var(--accent)}
+  .tools label{cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px}
+  .tools svg{width:24px;height:24px}
+
+  /* 登录页 */
+  .auth{max-width:400px;margin:0 auto;padding:60px 24px}
+  .auth .logo{font-size:40px;text-align:center;margin-bottom:24px}
+  .auth h1{font-size:28px;margin:0 0 20px}
+  .seg{display:flex;border:1px solid #cfd9de;border-radius:999px;overflow:hidden;margin-bottom:16px}
+  .seg button{flex:1;border:0;background:#fff;color:var(--mut);padding:11px 0;font-size:15px;font-weight:700}
+  .seg button.on{background:var(--txt);color:#fff}
+  .auth input{width:100%;border:1px solid #cfd9de;border-radius:6px;padding:14px 12px;font-size:16px;margin-bottom:12px;outline:none}
+  .auth input:focus{border-color:var(--accent)}
+  .auth .pill{width:100%;padding:13px;font-size:16px;background:var(--txt)}
+  .err{color:#f4212e;font-size:13px;min-height:18px;margin-top:8px}
+  .tip{color:var(--mut);font-size:13px;margin-top:8px}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;z-index:60}
 </style>
 </head>
 <body>
-<header>
-  <h1>微圈</h1>
-  <div><span id="me"></span> <button id="logoutBtn" class="ghost hide">退出</button></div>
-</header>
 
-<div class="wrap">
-
-  <!-- 登录 / 注册 -->
-  <section id="auth" class="card">
-    <div class="tabbar">
-      <button id="tabLogin">登录</button>
-      <button id="tabSignup" class="ghost">注册</button>
-    </div>
-    <input id="username" placeholder="用户名（字母、数字、下划线，2–20 位）" autocomplete="username" autocapitalize="off" />
-    <input id="password" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
-    <button id="authBtn">登录</button>
-    <div id="authErr" class="err"></div>
-    <div class="mut">只要用户名和密码，不需要邮箱。密码忘了无法找回，请记好。</div>
-  </section>
-
-  <!-- 发帖 -->
-  <section id="compose" class="card hide">
-    <textarea id="newContent" placeholder="说点什么…"></textarea>
-    <input id="newMedia" type="file" accept="image/*,video/*" />
-    <div style="text-align:right"><button id="postBtn">发布</button></div>
-    <div id="postErr" class="err"></div>
-  </section>
-
-  <!-- 时间线 -->
-  <div id="feedTabs" class="tabbar hide">
-    <button id="tabAll">全部</button>
-    <button id="tabFollow" class="ghost">关注</button>
+<!-- 登录 / 注册 -->
+<section id="auth" class="auth hide">
+  <div class="logo">微圈</div>
+  <h1>看看大家在聊什么</h1>
+  <div class="seg">
+    <button id="tabLogin" class="on">登录</button>
+    <button id="tabSignup">注册</button>
   </div>
+  <input id="username" placeholder="用户名（字母、数字、下划线，2–20 位）" autocomplete="username" autocapitalize="off" />
+  <input id="password" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
+  <button id="authBtn" class="pill">登录</button>
+  <div id="authErr" class="err"></div>
+  <div class="tip">只要用户名和密码，不需要邮箱。密码忘了无法找回，请记好。</div>
+</section>
+
+<!-- 主界面 -->
+<div id="main" class="app hide">
+  <div class="top">
+    <div class="topbar">
+      <div id="topAv" class="av"></div>
+      <div class="logo">微圈</div>
+    </div>
+    <div id="feedTabs" class="tabs">
+      <button id="tabAll" class="on">广场</button>
+      <button id="tabFollow">正在关注</button>
+    </div>
+    <div id="searchBar" class="search hide"><input id="q" placeholder="搜索帖子" /></div>
+  </div>
+
+  <div id="meCard" class="me-card hide"></div>
   <section id="feed"></section>
-  <div id="empty" class="mut hide" style="text-align:center;padding:20px">还没有帖子，来发第一条。</div>
+
+  <button id="fab" class="fab" aria-label="发帖"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+
+  <nav class="nav"><div class="in">
+    <button data-v="home" class="on" aria-label="首页"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg></button>
+    <button data-v="search" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <button data-v="me" aria-label="我的"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
+  </div></nav>
+</div>
+
+<!-- 发帖弹层 -->
+<div id="composer" class="modal hide">
+  <div class="sheet">
+    <div class="bar">
+      <button class="x" id="closeCompose">✕</button>
+      <button class="pill" id="postBtn">发帖</button>
+    </div>
+    <textarea id="newContent" placeholder="有什么新鲜事？" maxlength="500"></textarea>
+    <div id="preview" class="preview"></div>
+    <div class="tools">
+      <label><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>图片/视频<input id="newMedia" type="file" accept="image/*,video/*" hidden /></label>
+      <span id="count" style="color:var(--mut);font-size:13px">0/500</span>
+    </div>
+    <div id="postErr" class="err"></div>
+  </div>
 </div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ====== 改这两行为你自己的 Supabase 项目 ======
 const SUPABASE_URL = 'https://oolvxadtnhiteenpvmbd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_NHmJf-R_SwYWaxZH3J75fg_ebCj7PkM';
-// ==============================================
-
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const $ = s => document.querySelector(s);
-let me = null;            // 当前用户 {id, username}
-let mode = 'login';
-let feedMode = 'all';
-let myFollows = new Set();
+let me = null, mode = 'login', view = 'home', feedMode = 'all', myFollows = new Set(), searchTimer = null;
 
-// ---------- 登录相关 UI ----------
+const ICON = {
+  cmt:'<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>',
+  like:'<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-8.6C1.6 8.3 3.6 5 7 5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.4 0 5.4 3.3 4 6.4C19 15.6 12 20 12 20Z"/></svg>',
+  del:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  share:'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>'
+};
+
+// ---------- 工具 ----------
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function color(name){ let h=0; for(const c of name||'?') h=(h*31+c.charCodeAt(0))%360; return `hsl(${h},55%,52%)`; }
+function avatar(name, cls=''){ return `<div class="av ${cls}" style="background:${color(name)}">${esc((name||'?')[0].toUpperCase())}</div>`; }
+function ago(t){
+  const s=(Date.now()-new Date(t))/1000;
+  if(s<60) return '刚刚'; if(s<3600) return Math.floor(s/60)+'分钟';
+  if(s<86400) return Math.floor(s/3600)+'小时'; if(s<86400*7) return Math.floor(s/86400)+'天';
+  const d=new Date(t); return `${d.getMonth()+1}月${d.getDate()}日`;
+}
+function toast(msg){ const el=document.createElement('div'); el.className='toast'; el.textContent=msg; document.body.appendChild(el); setTimeout(()=>el.remove(),1800); }
+
+// ---------- 登录 ----------
 $('#tabLogin').onclick = () => setMode('login');
 $('#tabSignup').onclick = () => setMode('signup');
 function setMode(m){
   mode = m;
-  $('#tabLogin').className = m==='login'?'':'ghost';
-  $('#tabSignup').className = m==='signup'?'':'ghost';
+  $('#tabLogin').classList.toggle('on', m==='login');
+  $('#tabSignup').classList.toggle('on', m==='signup');
   $('#authBtn').textContent = m==='login'?'登录':'注册';
+  $('#authErr').textContent = '';
 }
-
 const toEmail = u => u.toLowerCase() + '@example.com';
 $('#authBtn').onclick = async () => {
   $('#authErr').textContent = '';
@@ -116,9 +215,7 @@ $('#authBtn').onclick = async () => {
       localStorage.setItem('pending_username', username);
       const { data, error } = await sb.auth.signUp({ email, password });
       if(error){ $('#authErr').textContent = /registered|exists/i.test(error.message) ? '用户名已被占用' : error.message; return; }
-      if(data.user && data.session){
-        await sb.from('profiles').insert({ id:data.user.id, username }).then(()=>{},()=>{});
-      }
+      if(data.user && data.session) await sb.from('profiles').insert({ id:data.user.id, username }).then(()=>{},()=>{});
     } else {
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if(error){ $('#authErr').textContent = /invalid/i.test(error.message) ? '用户名或密码不对' : error.message; return; }
@@ -126,149 +223,195 @@ $('#authBtn').onclick = async () => {
   } finally { $('#authBtn').disabled = false; }
 };
 
-$('#tabAll').onclick=()=>{feedMode='all';$('#tabAll').className='';$('#tabFollow').className='ghost';loadFeed();};
-$('#tabFollow').onclick=()=>{feedMode='follow';$('#tabFollow').className='';$('#tabAll').className='ghost';loadFeed();};
-
-$('#logoutBtn').onclick = async () => { await sb.auth.signOut(); location.reload(); };
-
 // ---------- 会话 ----------
-sb.auth.onAuthStateChange(async (_e, session) => { await boot(session); });
-(async ()=>{ const { data } = await sb.auth.getSession(); await boot(data.session); })();
-
+let booting = false;
+sb.auth.onAuthStateChange((_e, session) => { setTimeout(()=>boot(session),0); });
 async function boot(session){
-  if(!session){ me=null; showLoggedOut(); return; }
-  // 确保有 profile
-  let { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-  if(!prof){
-    const username = localStorage.getItem('pending_username') || ('user'+session.user.id.slice(0,6));
-    await sb.from('profiles').insert({ id:session.user.id, username }).then(()=>{},()=>{});
-    ({ data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single());
-  }
-  me = prof || { id:session.user.id, username:'me' };
-  showLoggedIn();
-  await loadFeed();
+  if(booting) return; booting = true;
+  try{
+    if(!session){ me=null; $('#auth').classList.remove('hide'); $('#main').classList.add('hide'); return; }
+    let { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if(!prof){
+      const username = localStorage.getItem('pending_username') || session.user.email.split('@')[0];
+      await sb.from('profiles').insert({ id:session.user.id, username }).then(()=>{},()=>{});
+      ({ data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
+    }
+    me = prof || { id:session.user.id, username:session.user.email.split('@')[0] };
+    $('#auth').classList.add('hide'); $('#main').classList.remove('hide');
+    $('#topAv').outerHTML = `<div id="topAv" class="av" style="background:${color(me.username)}">${esc(me.username[0].toUpperCase())}</div>`;
+    $('#topAv').onclick = () => go('me');
+    await loadFeed();
+  } finally { booting = false; }
 }
 
-function showLoggedOut(){
-  $('#auth').classList.remove('hide');
-  $('#compose').classList.add('hide');
-  $('#feedTabs').classList.add('hide');
-  $('#logoutBtn').classList.add('hide');
-  $('#me').textContent='';
-  $('#feed').innerHTML='';
+// ---------- 导航 ----------
+document.querySelectorAll('.nav button').forEach(b => b.onclick = () => go(b.dataset.v));
+function go(v){
+  view = v;
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.v===v));
+  $('#feedTabs').classList.toggle('hide', v!=='home');
+  $('#searchBar').classList.toggle('hide', v!=='search');
+  $('#meCard').classList.toggle('hide', v!=='me');
+  window.scrollTo(0,0);
+  if(v==='search') setTimeout(()=>$('#q').focus(),50);
+  loadFeed();
 }
-function showLoggedIn(){
-  $('#auth').classList.add('hide');
-  $('#compose').classList.remove('hide');
-  $('#feedTabs').classList.remove('hide');
-  $('#logoutBtn').classList.remove('hide');
-  $('#me').textContent='@'+me.username;
-}
+$('#tabAll').onclick = () => { feedMode='all'; $('#tabAll').classList.add('on'); $('#tabFollow').classList.remove('on'); loadFeed(); };
+$('#tabFollow').onclick = () => { feedMode='follow'; $('#tabFollow').classList.add('on'); $('#tabAll').classList.remove('on'); loadFeed(); };
+$('#q').oninput = () => { clearTimeout(searchTimer); searchTimer = setTimeout(loadFeed, 350); };
 
 // ---------- 发帖 ----------
+$('#fab').onclick = () => { $('#composer').classList.remove('hide'); setTimeout(()=>$('#newContent').focus(),50); };
+$('#closeCompose').onclick = closeCompose;
+function closeCompose(){ $('#composer').classList.add('hide'); $('#newContent').value=''; $('#newMedia').value=''; $('#preview').innerHTML=''; $('#postErr').textContent=''; $('#count').textContent='0/500'; }
+$('#newContent').oninput = e => $('#count').textContent = e.target.value.length + '/500';
+$('#newMedia').onchange = () => {
+  const f = $('#newMedia').files[0]; $('#preview').innerHTML='';
+  if(!f) return;
+  if(f.size > 50*1024*1024){ $('#postErr').textContent='文件超过 50 MB'; $('#newMedia').value=''; return; }
+  const url = URL.createObjectURL(f);
+  $('#preview').innerHTML = f.type.startsWith('video') ? `<video src="${url}" controls></video>` : `<img src="${url}">`;
+};
 $('#postBtn').onclick = async () => {
   $('#postErr').textContent='';
   const content = $('#newContent').value.trim();
   const file = $('#newMedia').files[0];
-  if(!content && !file){ $('#postErr').textContent='写点字或选个文件'; return; }
-  $('#postBtn').disabled=true;
+  if(!content && !file){ $('#postErr').textContent='写点字或选个图片/视频'; return; }
+  $('#postBtn').disabled = true; $('#postBtn').textContent = '发送中…';
   try{
     let media_url=null, media_type=null;
     if(file){
-      if(file.size > 50*1024*1024){ throw new Error('文件超过 50 MB'); }
       media_type = file.type.startsWith('video')?'video':'image';
-      const path = `${me.id}/${Date.now()}_${file.name.replace(/[^\w.\-]/g,'_')}`;
-      const { error:upErr } = await sb.storage.from('media').upload(path, file);
+      const ext = (file.name.split('.').pop()||'bin').replace(/[^\w]/g,'');
+      const path = `${me.id}/${Date.now()}.${ext}`;
+      const { error:upErr } = await sb.storage.from('media').upload(path, file, { contentType:file.type });
       if(upErr) throw upErr;
       media_url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
     }
     const { error } = await sb.from('posts').insert({ user_id:me.id, content, media_url, media_type });
     if(error) throw error;
-    $('#newContent').value=''; $('#newMedia').value='';
-    await loadFeed();
-  }catch(e){ $('#postErr').textContent=e.message||String(e); }
-  finally{ $('#postBtn').disabled=false; }
+    closeCompose(); toast('已发布');
+    if(view!=='home'){ go('home'); } else { loadFeed(); }
+  }catch(e){ $('#postErr').textContent = e.message || String(e); }
+  finally{ $('#postBtn').disabled=false; $('#postBtn').textContent='发帖'; }
 };
 
 // ---------- 时间线 ----------
 async function loadFeed(){
-  const { data: f } = await sb.from('follows').select('following_id').eq('follower_id',me.id);
+  const { data: f } = await sb.from('follows').select('following_id').eq('follower_id', me.id);
   myFollows = new Set((f||[]).map(x=>x.following_id));
+
   let q = sb.from('posts')
     .select('id,content,media_url,media_type,created_at,user_id,profiles!posts_user_id_fkey(username)')
-    .order('created_at',{ascending:false})
-    .limit(50);
-  if(feedMode==='follow') q = q.in('user_id', [...myFollows, me.id]);
-  const { data: posts, error } = await q;
-  if(error){ $('#feed').innerHTML='<div class="err">'+error.message+'</div>'; return; }
-  const ids = posts.map(p=>p.id);
-  const likeMap={}, myLikes=new Set();
-  if(ids.length){
-    const { data: likes } = await sb.from('likes').select('post_id,user_id').in('post_id',ids);
-    (likes||[]).forEach(l=>{ likeMap[l.post_id]=(likeMap[l.post_id]||0)+1; if(l.user_id===me.id) myLikes.add(l.post_id); });
+    .order('created_at',{ascending:false}).limit(50);
+  if(view==='home' && feedMode==='follow') q = q.in('user_id', [...myFollows, me.id]);
+  if(view==='me') q = q.eq('user_id', me.id);
+  if(view==='search'){
+    const kw = $('#q').value.trim();
+    if(!kw){ $('#feed').innerHTML = '<div class="empty">输入关键词搜索帖子</div>'; return; }
+    q = q.ilike('content', `%${kw}%`);
   }
-  $('#empty').classList.toggle('hide', posts.length>0);
-  $('#feed').innerHTML = posts.map(p=>render(p, likeMap[p.id]||0, myLikes.has(p.id))).join('');
-  posts.forEach(p=>wire(p));
+  const { data: posts, error } = await q;
+  if(error){ $('#feed').innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
+
+  if(view==='me') renderMe(posts.length);
+
+  const ids = posts.map(p=>p.id);
+  const likeN={}, myLikes=new Set(), cmtN={};
+  if(ids.length){
+    const [{ data: likes }, { data: cmts }] = await Promise.all([
+      sb.from('likes').select('post_id,user_id').in('post_id', ids),
+      sb.from('comments').select('post_id').in('post_id', ids)
+    ]);
+    (likes||[]).forEach(l=>{ likeN[l.post_id]=(likeN[l.post_id]||0)+1; if(l.user_id===me.id) myLikes.add(l.post_id); });
+    (cmts||[]).forEach(c=>{ cmtN[c.post_id]=(cmtN[c.post_id]||0)+1; });
+  }
+  if(!posts.length){
+    const msg = view==='search' ? '没有找到相关帖子' : view==='me' ? '你还没发过帖子' : feedMode==='follow' ? '关注的人还没发帖，去广场看看' : '广场还没有帖子，点右下角发第一条';
+    $('#feed').innerHTML = `<div class="empty">${msg}</div>`; return;
+  }
+  $('#feed').innerHTML = posts.map(p => render(p, likeN[p.id]||0, myLikes.has(p.id), cmtN[p.id]||0)).join('');
+  posts.forEach(wire);
 }
 
-function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function when(t){ const d=new Date(t); return d.toLocaleString(); }
-
-function render(p, likeCount, liked){
-  let media='';
-  if(p.media_url && p.media_type==='image') media=`<div class="post-media"><img src="${p.media_url}" loading="lazy"></div>`;
-  if(p.media_url && p.media_type==='video') media=`<div class="post-media"><video src="${p.media_url}" controls></video></div>`;
-  return `<div class="card" data-id="${p.id}">
-    <div class="head"><span class="who"><span class="name">@${esc(p.profiles?.username||'匿名')}</span><span class="time">${when(p.created_at)}</span></span>${p.user_id!==me.id?`<button class="ghost fol" style="padding:4px 12px;font-size:12px">${myFollows.has(p.user_id)?'已关注':'+ 关注'}</button>`:''}</div>
-    <div>${esc(p.content)}</div>
-    ${media}
-    <div class="row">
-      <span class="like ${liked?'on':''}">♥ <b class="lc">${likeCount}</b></span>
-      <span class="cmt">💬 评论</span>
-      ${p.user_id===me.id?'<span class="del">🗑 删除</span>':''}
+async function renderMe(postCount){
+  const [{ count: following }, { count: followers }] = await Promise.all([
+    sb.from('follows').select('*',{count:'exact',head:true}).eq('follower_id', me.id),
+    sb.from('follows').select('*',{count:'exact',head:true}).eq('following_id', me.id)
+  ]);
+  $('#meCard').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      ${avatar(me.username)}
+      <button class="outline" id="logoutBtn">退出登录</button>
     </div>
-    <div class="comments hide"></div>
-  </div>`;
+    <h2>${esc(me.username)}</h2>
+    <div class="mut">@${esc(me.username.toLowerCase())}</div>
+    <div class="stats"><span><b>${following||0}</b> 正在关注</span><span><b>${followers||0}</b> 关注者</span><span><b>${postCount}</b> 帖子</span></div>`;
+  $('#logoutBtn').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+}
+
+function render(p, likeCount, liked, cmtCount){
+  const name = p.profiles?.username || '匿名';
+  let media = '';
+  if(p.media_url && p.media_type==='image') media = `<div class="pmedia"><img src="${esc(p.media_url)}" loading="lazy"></div>`;
+  if(p.media_url && p.media_type==='video') media = `<div class="pmedia"><video src="${esc(p.media_url)}" controls playsinline preload="metadata"></video></div>`;
+  const followBtn = p.user_id!==me.id ? `<button class="fol ${myFollows.has(p.user_id)?'on':''}">${myFollows.has(p.user_id)?'已关注':'关注'}</button>` : '';
+  return `<article class="post" data-id="${p.id}">
+    ${avatar(name)}
+    <div class="pbody">
+      <div class="phead"><span class="nm">${esc(name)}</span><span class="hd">@${esc(name.toLowerCase())} · ${ago(p.created_at)}</span><span class="sp"></span>${followBtn}</div>
+      ${p.content ? `<div class="ptext">${esc(p.content)}</div>` : ''}
+      ${media}
+      <div class="acts">
+        <span class="c">${ICON.cmt}<b class="cn">${cmtCount||''}</b></span>
+        <span class="like ${liked?'on':''}">${ICON.like}<b class="lc">${likeCount||''}</b></span>
+        <span class="sh">${ICON.share}</span>
+        ${p.user_id===me.id ? `<span class="del">${ICON.del}</span>` : '<span></span>'}
+      </div>
+      <div class="cbox hide"></div>
+    </div>
+  </article>`;
 }
 
 function wire(p){
-  const el = $(`.card[data-id="${p.id}"]`);
-  el.querySelector('.like').onclick = async (ev)=>{
-    const on = ev.currentTarget.classList.contains('on');
-    const b = el.querySelector('.lc');
-    if(on){ await sb.from('likes').delete().eq('post_id',p.id).eq('user_id',me.id); ev.currentTarget.classList.remove('on'); b.textContent=Math.max(0,+b.textContent-1); }
-    else { await sb.from('likes').insert({post_id:p.id,user_id:me.id}); ev.currentTarget.classList.add('on'); b.textContent=+b.textContent+1; }
+  const el = document.querySelector(`.post[data-id="${p.id}"]`);
+  el.querySelector('.like').onclick = async e => {
+    const b = e.currentTarget, n = el.querySelector('.lc'), cur = +(n.textContent||0);
+    if(b.classList.contains('on')){ b.classList.remove('on'); n.textContent = cur-1 || ''; await sb.from('likes').delete().eq('post_id',p.id).eq('user_id',me.id); }
+    else { b.classList.add('on'); n.textContent = cur+1; await sb.from('likes').insert({ post_id:p.id, user_id:me.id }); }
   };
   const fol = el.querySelector('.fol');
-  if(fol) fol.onclick = async ()=>{
+  if(fol) fol.onclick = async () => {
     if(myFollows.has(p.user_id)){ await sb.from('follows').delete().eq('follower_id',me.id).eq('following_id',p.user_id); myFollows.delete(p.user_id); }
-    else { await sb.from('follows').insert({follower_id:me.id,following_id:p.user_id}); myFollows.add(p.user_id); }
-    document.querySelectorAll('.fol').forEach(()=>{}); loadFeed();
+    else { await sb.from('follows').insert({ follower_id:me.id, following_id:p.user_id }); myFollows.add(p.user_id); }
+    loadFeed();
   };
   const del = el.querySelector('.del');
-  if(del) del.onclick = async ()=>{ if(confirm('删除这条？')){ await sb.from('posts').delete().eq('id',p.id); el.remove(); } };
-  el.querySelector('.cmt').onclick = ()=> toggleComments(p.id, el);
+  if(del) del.onclick = async () => { if(confirm('删除这条帖子？')){ await sb.from('posts').delete().eq('id',p.id); el.remove(); toast('已删除'); } };
+  el.querySelector('.sh').onclick = async () => {
+    const url = location.href.split('#')[0] + '#post-' + p.id;
+    try{ if(navigator.share) await navigator.share({ title:'微圈', text:p.content||'', url }); else { await navigator.clipboard.writeText(url); toast('链接已复制'); } }catch(_){}
+  };
+  el.querySelector('.c').onclick = () => toggleComments(p.id, el);
 }
 
 async function toggleComments(postId, el){
-  const box = el.querySelector('.comments');
+  const box = el.querySelector('.cbox');
   if(!box.classList.contains('hide')){ box.classList.add('hide'); return; }
   box.classList.remove('hide');
-  const { data } = await sb.from('comments')
-    .select('id,content,created_at,profiles(username)')
-    .eq('post_id',postId).order('created_at',{ascending:true});
-  box.innerHTML = (data||[]).map(c=>`<div class="comment"><span class="name">@${esc(c.profiles?.username||'匿名')}</span> ${esc(c.content)}<div class="time">${when(c.created_at)}</div></div>`).join('')
-    + `<div class="comment"><input class="ci" placeholder="写评论…"><div style="text-align:right"><button class="cb">发送</button></div></div>`;
-  box.querySelector('.cb').onclick = async ()=>{
-    const v = box.querySelector('.ci').value.trim();
-    if(!v) return;
-    const { error } = await sb.from('comments').insert({post_id:postId,user_id:me.id,content:v});
-    if(!error){ box.classList.add('hide'); toggleComments(postId, el); }
+  const { data } = await sb.from('comments').select('id,content,created_at,profiles(username)').eq('post_id',postId).order('created_at',{ascending:true});
+  box.innerHTML = (data||[]).map(c => `<div class="cmt"><b>${esc(c.profiles?.username||'匿名')}</b><span class="t">${ago(c.created_at)}</span><div>${esc(c.content)}</div></div>`).join('')
+    + `<div class="crow"><input class="ci" placeholder="发布你的回复" maxlength="300"><button class="pill cb">回复</button></div>`;
+  const send = async () => {
+    const v = box.querySelector('.ci').value.trim(); if(!v) return;
+    const { error } = await sb.from('comments').insert({ post_id:postId, user_id:me.id, content:v });
+    if(!error){ const n = el.querySelector('.cn'); n.textContent = +(n.textContent||0)+1; box.classList.add('hide'); toggleComments(postId, el); }
   };
+  box.querySelector('.cb').onclick = send;
+  box.querySelector('.ci').onkeydown = e => { if(e.key==='Enter') send(); };
 }
 
-setMode('login');
+(async () => { const { data } = await sb.auth.getSession(); if(!data.session) boot(null); })();
 </script>
 </body>
 </html>
