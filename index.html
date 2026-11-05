@@ -2,10 +2,13 @@
 <html lang="zh">
 <head>
 <meta charset="utf-8" />
+<script>try{const t=JSON.parse(localStorage.getItem('ms_theme')||'{}');if(t.mode)document.documentElement.dataset.theme=t.mode;if(t.accent)document.documentElement.style.setProperty('--accent',t.accent);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>微圈</title>
 <style>
-  :root{--bg:#fff;--txt:#0f1419;--mut:#536471;--line:#eff3f4;--accent:#1d9bf0;--like:#f91880;}
+  :root{--bg:#fff;--txt:#0f1419;--mut:#536471;--line:#eff3f4;--accent:#1d9bf0;--like:#f91880;--bd:#cfd9de;--soft:#eff3f4;--topbg:rgba(255,255,255,.88)}
+  html[data-theme=dim]{--bg:#15202b;--txt:#f7f9f9;--mut:#8b98a5;--line:#38444d;--bd:#425364;--soft:#273340;--topbg:rgba(21,32,43,.88)}
+  html[data-theme=dark]{--bg:#000;--txt:#e7e9ea;--mut:#71767b;--line:#2f3336;--bd:#3e4144;--soft:#202327;--topbg:rgba(0,0,0,.8)}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif}
   .hide{display:none !important}
@@ -14,7 +17,7 @@
   svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
   /* 顶栏 */
-  .top{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .top{position:sticky;top:0;z-index:10;background:var(--topbg);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   .topbar{display:flex;align-items:center;justify-content:center;height:54px;position:relative}
   .topbar .av{position:absolute;left:16px;width:34px;height:34px;font-size:15px}
   .logo{font-size:22px;font-weight:800;letter-spacing:1px}
@@ -24,8 +27,17 @@
   .tabs button.on::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:56px;height:4px;border-radius:2px;background:var(--accent)}
 
   /* 头像 */
-  .av{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;user-select:none}
+  .av{overflow:hidden;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;user-select:none}
 
+  .av img{width:100%;height:100%;object-fit:cover;display:block}
+  .av.sm{width:24px;height:24px;font-size:11px}
+  .set-av{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 0;border-bottom:1px solid var(--line)}
+  .set-av .av{width:88px;height:88px;font-size:36px}
+  .set-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .set-row .mut{color:var(--mut)}
+  .set-label{font-size:13px;color:var(--mut);margin-top:14px}
+  .set-bio{width:100%;border:1px solid var(--bd);border-radius:8px;padding:10px;font-size:15px;min-height:70px;resize:none;font-family:inherit;outline:none;margin-top:6px}
+  .danger{width:100%;margin-top:24px;background:var(--bg);border:1px solid #fdc9ce;color:#f4212e;border-radius:999px;padding:11px;font-weight:700;font-size:15px}
   /* 帖子 */
   .post{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
   .post .av{width:42px;height:42px;font-size:17px}
@@ -34,8 +46,8 @@
   .phead .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;max-width:40%}
   .phead .hd{color:var(--mut);overflow:hidden;text-overflow:ellipsis;min-width:0}
   .phead .sp{flex:1}
-  .fol{border:1px solid #cfd9de;background:#fff;color:var(--txt);border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;white-space:nowrap}
-  .fol.on{background:var(--txt);color:#fff;border-color:var(--txt)}
+  .fol{border:1px solid var(--bd);background:var(--bg);color:var(--txt);border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+  .fol.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
   .ptext{font-size:15px;line-height:1.5;margin-top:2px;white-space:pre-wrap;word-break:break-word}
   .pmedia{margin-top:10px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .pmedia img,.pmedia video{display:block;width:100%;max-height:520px;object-fit:cover;background:#000}
@@ -48,7 +60,7 @@
   .cmt b{font-weight:700}
   .cmt .t{color:var(--mut);font-size:12px;margin-left:6px}
   .crow{display:flex;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
-  .crow input{flex:1;border:1px solid #cfd9de;border-radius:999px;padding:8px 14px;font-size:14px;outline:none}
+  .crow input{flex:1;border:1px solid var(--bd);border-radius:999px;padding:8px 14px;font-size:14px;outline:none}
   .pill{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700;white-space:nowrap}
   .pill:disabled{opacity:.5}
   .quick{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -61,7 +73,7 @@
   .fab svg{width:26px;height:26px}
 
   /* 底部导航 */
-  .nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+  .nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);z-index:20;padding-bottom:env(safe-area-inset-bottom)}
   .nav .in{max-width:600px;margin:0 auto;display:flex}
   .nav button{flex:1;height:56px;background:none;border:0;color:var(--txt);display:flex;align-items:center;justify-content:center}
   .nav button svg{width:27px;height:27px}
@@ -69,20 +81,20 @@
 
   /* 搜索 / 我的 */
   .search{padding:10px 16px;border-bottom:1px solid var(--line)}
-  .search input{width:100%;background:#eff3f4;border:0;border-radius:999px;padding:11px 16px;font-size:15px;outline:none}
+  .search input{width:100%;background:var(--soft);border:0;border-radius:999px;padding:11px 16px;font-size:15px;outline:none}
   .me-card{padding:20px 16px;border-bottom:1px solid var(--line)}
   .me-card .av{width:68px;height:68px;font-size:28px}
   .me-card h2{margin:10px 0 0;font-size:20px}
   .me-card .mut{color:var(--mut);font-size:14px;margin-top:2px}
   .me-card .stats{display:flex;gap:16px;margin-top:10px;font-size:14px;color:var(--mut)}
   .me-card .stats b{color:var(--txt)}
-  .outline{background:#fff;border:1px solid #cfd9de;color:var(--txt);border-radius:999px;padding:7px 16px;font-weight:700;font-size:14px}
+  .outline{background:var(--bg);border:1px solid var(--bd);color:var(--txt);border-radius:999px;padding:7px 16px;font-weight:700;font-size:14px}
 
   /* 发帖弹层 */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-start;justify-content:center}
-  .sheet{background:#fff;width:100%;max-width:600px;min-height:100%;padding:12px 16px}
+  .sheet{background:var(--bg);width:100%;max-width:600px;min-height:100%;padding:12px 16px}
   @media(min-width:640px){.modal{padding-top:5vh}.sheet{min-height:auto;border-radius:16px}}
-  .sheet .bar{position:sticky;top:0;background:#fff;z-index:2;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sheet .bar{position:sticky;top:0;background:var(--bg);z-index:2;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .sheet .x{background:none;border:0;font-size:22px;padding:4px 8px}
   .sheet textarea{width:100%;border:0;outline:none;font-size:18px;min-height:140px;resize:none;font-family:inherit}
   .preview img,.preview video{max-width:100%;max-height:300px;border-radius:16px;display:block}
@@ -94,15 +106,23 @@
   .auth{max-width:400px;margin:0 auto;padding:60px 24px}
   .auth .logo{font-size:40px;text-align:center;margin-bottom:24px}
   .auth h1{font-size:28px;margin:0 0 20px}
-  .seg{display:flex;border:1px solid #cfd9de;border-radius:999px;overflow:hidden;margin-bottom:16px}
-  .seg button{flex:1;border:0;background:#fff;color:var(--mut);padding:11px 0;font-size:15px;font-weight:700}
-  .seg button.on{background:var(--txt);color:#fff}
-  .auth input{width:100%;border:1px solid #cfd9de;border-radius:6px;padding:14px 12px;font-size:16px;margin-bottom:12px;outline:none}
+  .seg{display:flex;border:1px solid var(--bd);border-radius:999px;overflow:hidden;margin-bottom:16px}
+  .seg button{flex:1;border:0;background:var(--bg);color:var(--mut);padding:11px 0;font-size:15px;font-weight:700}
+  .seg button.on{background:var(--txt);color:var(--bg)}
+  .auth input{width:100%;border:1px solid var(--bd);border-radius:6px;padding:14px 12px;font-size:16px;margin-bottom:12px;outline:none}
   .auth input:focus{border-color:var(--accent)}
-  .auth .pill{width:100%;padding:13px;font-size:16px;background:var(--txt)}
+  .auth .pill{width:100%;padding:13px;font-size:16px;background:var(--txt);color:var(--bg)}
   .err{color:#f4212e;font-size:13px;min-height:18px;margin-top:8px}
   .tip{color:var(--mut);font-size:13px;margin-top:8px}
   .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;z-index:60}
+  input,textarea{background:var(--bg);color:var(--txt)}
+  .modal .x{color:var(--txt)}
+  .themes{display:flex;gap:8px;margin-top:6px}
+  .themes button{flex:1;border:2px solid var(--bd);border-radius:10px;padding:10px 0;font-weight:700;font-size:14px}
+  .themes button.on{border-color:var(--accent)}
+  .colors{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+  .colors button{width:34px;height:34px;border-radius:50%;border:3px solid transparent;padding:0}
+  .colors button.on{border-color:var(--txt)}
 </style>
 </head>
 <body>
@@ -166,6 +186,42 @@
   </div>
 </div>
 
+<!-- 设置（点头像打开） -->
+<div id="settings" class="modal hide">
+  <div class="sheet">
+    <div class="bar">
+      <button class="x" id="closeSet">✕</button>
+      <b style="font-size:17px">设置</b>
+      <button class="pill" id="saveSet">保存</button>
+    </div>
+    <div class="set-av">
+      <div id="setAv" class="av"></div>
+      <label class="outline" style="cursor:pointer">更换头像<input id="avFile" type="file" accept="image/*" hidden></label>
+      <button class="x" id="avReset" style="font-size:13px;color:var(--mut)">恢复默认头像</button>
+    </div>
+    <div class="set-row"><span>用户名</span><span class="mut" id="setName"></span></div>
+    <div class="set-label">个人简介</div>
+    <textarea id="setBio" class="set-bio" maxlength="160" placeholder="介绍一下自己"></textarea>
+    <div class="set-label">主题</div>
+    <div class="themes" id="themes">
+      <button data-m="light" style="background:#fff;color:#0f1419">浅色</button>
+      <button data-m="dim" style="background:#15202b;color:#f7f9f9">暗蓝</button>
+      <button data-m="dark" style="background:#000;color:#e7e9ea">纯黑</button>
+    </div>
+    <div class="set-label">主色</div>
+    <div class="colors" id="colors">
+      <button data-c="#1d9bf0" style="background:#1d9bf0"></button>
+      <button data-c="#f91880" style="background:#f91880"></button>
+      <button data-c="#7856ff" style="background:#7856ff"></button>
+      <button data-c="#ff7a00" style="background:#ff7a00"></button>
+      <button data-c="#00ba7c" style="background:#00ba7c"></button>
+      <button data-c="#ffd400" style="background:#ffd400"></button>
+    </div>
+    <div id="setErr" class="err"></div>
+    <button class="danger" id="logoutBtn">退出登录</button>
+  </div>
+</div>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -186,7 +242,9 @@ const ICON = {
 // ---------- 工具 ----------
 function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function color(name){ let h=0; for(const c of name||'?') h=(h*31+c.charCodeAt(0))%360; return `hsl(${h},55%,52%)`; }
-function avatar(name, cls=''){ return `<div class="av ${cls}" style="background:${color(name)}">${esc((name||'?')[0].toUpperCase())}</div>`; }
+function avInner(name,url){ return url ? `<img src="${esc(url)}" alt="">` : esc((name||'?')[0].toUpperCase()); }
+function avatar(name, url, cls=''){ return `<div class="av ${cls}" style="background:${color(name)}">${avInner(name,url)}</div>`; }
+function paintMyAv(){ ['#topAv','#quickAv'].forEach(id=>{ const el=$(id); el.style.background=color(me.username); el.innerHTML=avInner(me.username, me.avatar_url); }); }
 function ago(t){
   const s=(Date.now()-new Date(t))/1000;
   if(s<60) return '刚刚'; if(s<3600) return Math.floor(s/60)+'分钟';
@@ -242,9 +300,7 @@ async function boot(session){
     }
     me = prof || { id:session.user.id, username:session.user.email.split('@')[0] };
     $('#auth').classList.add('hide'); $('#main').classList.remove('hide');
-    $('#topAv').outerHTML = `<div id="topAv" class="av" style="background:${color(me.username)}">${esc(me.username[0].toUpperCase())}</div>`;
-    $('#topAv').onclick = () => go('me');
-    $('#quickAv').style.background = color(me.username); $('#quickAv').textContent = me.username[0].toUpperCase();
+    paintMyAv();
     await loadFeed();
   } finally { booting = false; }
 }
@@ -303,13 +359,68 @@ $('#postBtn').onclick = async () => {
   finally{ $('#postBtn').disabled=false; $('#postBtn').textContent='发帖'; }
 };
 
+// ---------- 设置 ----------
+let avBlob = null, avCleared = false;
+function openSettings(){
+  avBlob=null; avCleared=false; $('#setErr').textContent='';
+  $('#setName').textContent='@'+me.username;
+  $('#setBio').value = me.bio||'';
+  $('#setAv').style.background=color(me.username); $('#setAv').innerHTML=avInner(me.username, me.avatar_url);
+  $('#settings').classList.remove('hide');
+}
+$('#topAv').onclick = openSettings;
+// 主题（存在本机，立即生效）
+function getTheme(){ try{ return JSON.parse(localStorage.getItem('ms_theme')||'{}'); }catch(_){ return {}; } }
+function applyTheme(t){
+  const r=document.documentElement;
+  if(t.mode && t.mode!=='light') r.dataset.theme=t.mode; else delete r.dataset.theme;
+  r.style.setProperty('--accent', t.accent||'#1d9bf0');
+  localStorage.setItem('ms_theme', JSON.stringify(t));
+  document.querySelectorAll('#themes button').forEach(b=>b.classList.toggle('on', b.dataset.m===(t.mode||'light')));
+  document.querySelectorAll('#colors button').forEach(b=>b.classList.toggle('on', b.dataset.c===(t.accent||'#1d9bf0')));
+}
+document.querySelectorAll('#themes button').forEach(b=>b.onclick=()=>applyTheme({...getTheme(), mode:b.dataset.m}));
+document.querySelectorAll('#colors button').forEach(b=>b.onclick=()=>applyTheme({...getTheme(), accent:b.dataset.c}));
+applyTheme(getTheme());
+$('#setAv').onclick = () => $('#avFile').click();
+$('#closeSet').onclick = () => $('#settings').classList.add('hide');
+$('#logoutBtn').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+$('#avReset').onclick = () => { avBlob=null; avCleared=true; $('#setAv').innerHTML=avInner(me.username,null); };
+$('#avFile').onchange = async () => {
+  const f=$('#avFile').files[0]; $('#avFile').value=''; if(!f) return;
+  try{
+    const img = await new Promise((ok,bad)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=bad; i.src=URL.createObjectURL(f); });
+    const side=Math.min(img.width,img.height), c=document.createElement('canvas'); c.width=c.height=400;
+    c.getContext('2d').drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,400,400);
+    avBlob = await new Promise(r=>c.toBlob(r,'image/jpeg',0.88)); avCleared=false;
+    $('#setAv').innerHTML = `<img src="${URL.createObjectURL(avBlob)}">`;
+  }catch(_){ $('#setErr').textContent='这张图片读不了，换一张试试'; }
+};
+$('#saveSet').onclick = async () => {
+  $('#setErr').textContent=''; $('#saveSet').disabled=true; $('#saveSet').textContent='保存中…';
+  try{
+    const upd = { bio: $('#setBio').value.trim() };
+    if(avBlob){
+      const path = `${me.id}/avatar_${Date.now()}.jpg`;
+      const { error } = await sb.storage.from('media').upload(path, avBlob, { contentType:'image/jpeg' });
+      if(error) throw error;
+      upd.avatar_url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+    } else if(avCleared) upd.avatar_url = null;
+    const { error } = await sb.from('profiles').update(upd).eq('id', me.id);
+    if(error) throw error;
+    Object.assign(me, upd); paintMyAv();
+    $('#settings').classList.add('hide'); toast('已保存'); loadFeed();
+  }catch(e){ $('#setErr').textContent = e.message||String(e); }
+  finally{ $('#saveSet').disabled=false; $('#saveSet').textContent='保存'; }
+};
+
 // ---------- 时间线 ----------
 async function loadFeed(){
   const { data: f } = await sb.from('follows').select('following_id').eq('follower_id', me.id);
   myFollows = new Set((f||[]).map(x=>x.following_id));
 
   let q = sb.from('posts')
-    .select('id,content,media_url,media_type,created_at,user_id,profiles!posts_user_id_fkey(username)')
+    .select('id,content,media_url,media_type,created_at,user_id,profiles!posts_user_id_fkey(username,avatar_url)')
     .order('created_at',{ascending:false}).limit(50);
   if(view==='home' && feedMode==='follow') q = q.in('user_id', [...myFollows, me.id]);
   if(view==='me') q = q.eq('user_id', me.id);
@@ -348,13 +459,14 @@ async function renderMe(postCount){
   ]);
   $('#meCard').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
-      ${avatar(me.username)}
-      <button class="outline" id="logoutBtn">退出登录</button>
+      ${avatar(me.username, me.avatar_url)}
+      <button class="outline" id="editBtn">编辑资料</button>
     </div>
     <h2>${esc(me.username)}</h2>
     <div class="mut">@${esc(me.username.toLowerCase())}</div>
+    ${me.bio ? `<div style="margin-top:8px;font-size:15px;white-space:pre-wrap">${esc(me.bio)}</div>` : ''}
     <div class="stats"><span><b>${following||0}</b> 正在关注</span><span><b>${followers||0}</b> 关注者</span><span><b>${postCount}</b> 帖子</span></div>`;
-  $('#logoutBtn').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+  $('#editBtn').onclick = openSettings;
 }
 
 function render(p, likeCount, liked, cmtCount){
@@ -364,7 +476,7 @@ function render(p, likeCount, liked, cmtCount){
   if(p.media_url && p.media_type==='video') media = `<div class="pmedia"><video src="${esc(p.media_url)}" controls playsinline preload="metadata"></video></div>`;
   const followBtn = p.user_id!==me.id ? `<button class="fol ${myFollows.has(p.user_id)?'on':''}">${myFollows.has(p.user_id)?'已关注':'关注'}</button>` : '';
   return `<article class="post" data-id="${p.id}">
-    ${avatar(name)}
+    ${avatar(name, p.profiles?.avatar_url)}
     <div class="pbody">
       <div class="phead"><span class="nm">${esc(name)}</span><span class="hd">@${esc(name.toLowerCase())} · ${ago(p.created_at)}</span><span class="sp"></span>${followBtn}</div>
       ${p.content ? `<div class="ptext">${esc(p.content)}</div>` : ''}
@@ -406,8 +518,8 @@ async function toggleComments(postId, el){
   const box = el.querySelector('.cbox');
   if(!box.classList.contains('hide')){ box.classList.add('hide'); return; }
   box.classList.remove('hide');
-  const { data } = await sb.from('comments').select('id,content,created_at,profiles(username)').eq('post_id',postId).order('created_at',{ascending:true});
-  box.innerHTML = (data||[]).map(c => `<div class="cmt"><b>${esc(c.profiles?.username||'匿名')}</b><span class="t">${ago(c.created_at)}</span><div>${esc(c.content)}</div></div>`).join('')
+  const { data } = await sb.from('comments').select('id,content,created_at,profiles(username,avatar_url)').eq('post_id',postId).order('created_at',{ascending:true});
+  box.innerHTML = (data||[]).map(c => `<div class="cmt"><div style="display:flex;align-items:center;gap:8px">${avatar(c.profiles?.username||'?', c.profiles?.avatar_url, 'sm')}<b>${esc(c.profiles?.username||'匿名')}</b><span class="t">${ago(c.created_at)}</span></div><div style="margin-left:32px">${esc(c.content)}</div></div>`).join('')
     + `<div class="crow"><input class="ci" placeholder="发布你的回复" maxlength="300"><button class="pill cb">回复</button></div>`;
   const send = async () => {
     const v = box.querySelector('.ci').value.trim(); if(!v) return;
