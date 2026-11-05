@@ -117,6 +117,10 @@
   .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;z-index:60}
   input,textarea{background:var(--bg);color:var(--txt)}
   .modal .x{color:var(--txt)}
+  .modal.pop{align-items:center;padding:20px;animation:fade .15s}
+  .modal.pop .sheet{min-height:auto;max-width:400px;max-height:86vh;overflow-y:auto;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.25);animation:popin .18s ease-out}
+  @keyframes popin{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
   .themes{display:flex;gap:8px;margin-top:6px}
   .themes button{flex:1;border:2px solid var(--bd);border-radius:10px;padding:10px 0;font-weight:700;font-size:14px}
   .themes button.on{border-color:var(--accent)}
@@ -187,7 +191,7 @@
 </div>
 
 <!-- 设置（点头像打开） -->
-<div id="settings" class="modal hide">
+<div id="settings" class="modal pop hide">
   <div class="sheet">
     <div class="bar">
       <button class="x" id="closeSet">✕</button>
@@ -388,6 +392,7 @@ document.querySelectorAll('#colors button').forEach(b=>b.onclick=()=>applyTheme(
 applyTheme(getTheme());
 $('#setAv').onclick = () => $('#avFile').click();
 $('#closeSet').onclick = () => $('#settings').classList.add('hide');
+$('#settings').onclick = e => { if(e.target.id==='settings') $('#settings').classList.add('hide'); };
 $('#logoutBtn').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 $('#avReset').onclick = () => { avBlob=null; avCleared=true; $('#setAv').innerHTML=avInner(me.username,null); };
 $('#avFile').onchange = async () => {
