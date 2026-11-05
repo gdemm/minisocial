@@ -47,12 +47,11 @@
       <button id="tabLogin">登录</button>
       <button id="tabSignup" class="ghost">注册</button>
     </div>
-    <input id="email" type="email" placeholder="邮箱" autocomplete="email" />
+    <input id="username" placeholder="用户名（字母、数字、下划线，2–20 位）" autocomplete="username" autocapitalize="off" />
     <input id="password" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
-    <input id="username" class="hide" placeholder="用户名（注册时填）" />
     <button id="authBtn">登录</button>
     <div id="authErr" class="err"></div>
-    <div class="mut">注册后若提示验证邮箱，去邮箱点一下链接再回来登录。</div>
+    <div class="mut">只要用户名和密码，不需要邮箱。密码忘了无法找回，请记好。</div>
   </section>
 
   <!-- 发帖 -->
@@ -95,30 +94,31 @@ function setMode(m){
   mode = m;
   $('#tabLogin').className = m==='login'?'':'ghost';
   $('#tabSignup').className = m==='signup'?'':'ghost';
-  $('#username').classList.toggle('hide', m!=='signup');
   $('#authBtn').textContent = m==='login'?'登录':'注册';
 }
 
+const toEmail = u => u.toLowerCase() + '@example.com';
 $('#authBtn').onclick = async () => {
   $('#authErr').textContent = '';
-  const email = $('#email').value.trim();
+  const username = $('#username').value.trim();
   const password = $('#password').value;
-  if(!email || !password){ $('#authErr').textContent='填邮箱和密码'; return; }
-  if(mode==='signup'){
-    const username = $('#username').value.trim();
-    if(username.length<2){ $('#authErr').textContent='用户名至少 2 位'; return; }
-    const { data, error } = await sb.auth.signUp({ email, password });
-    if(error){ $('#authErr').textContent=error.message; return; }
-    if(data.user){
-      // 建资料（可能需邮箱验证后才有 session，这里尽量写）
-      await sb.from('profiles').insert({ id:data.user.id, username }).then(()=>{},()=>{});
+  if(!/^[A-Za-z0-9_]{2,20}$/.test(username)){ $('#authErr').textContent='用户名只能用字母、数字、下划线，2–20 位'; return; }
+  if(password.length < 6){ $('#authErr').textContent='密码至少 6 位'; return; }
+  const email = toEmail(username);
+  $('#authBtn').disabled = true;
+  try{
+    if(mode==='signup'){
       localStorage.setItem('pending_username', username);
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if(error){ $('#authErr').textContent = /registered|exists/i.test(error.message) ? '用户名已被占用' : error.message; return; }
+      if(data.user && data.session){
+        await sb.from('profiles').insert({ id:data.user.id, username }).then(()=>{},()=>{});
+      }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if(error){ $('#authErr').textContent = /invalid/i.test(error.message) ? '用户名或密码不对' : error.message; return; }
     }
-    $('#authErr').textContent='注册成功，若收到验证邮件请先验证再登录。';
-  } else {
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if(error){ $('#authErr').textContent=error.message; return; }
-  }
+  } finally { $('#authBtn').disabled = false; }
 };
 
 $('#tabAll').onclick=()=>{feedMode='all';$('#tabAll').className='';$('#tabFollow').className='ghost';loadFeed();};
